@@ -1,91 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Workout Tracker</title>
-    
-    <!-- PWA Web Manifest Link Integration -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e1e1e">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <title>Workout Tracker Kami</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .card { background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 100%; max-width: 340px; position: relative; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 100%; max-width: 350px; position: relative; }
         
         /* User Selector Switch */
         .user-selector { display: flex; background: #2d2d2d; border-radius: 8px; padding: 4px; margin-bottom: 20px; }
-        .user-btn { flex: 1; background: transparent; color: #888; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .user-btn { flex: 1; background: transparent; color: #888; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; font-size: 14px; }
         .user-btn.active { background: #30363d; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         button.main-btn { background: #238636; color: white; border: none; padding: 14px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
-        button.main-btn:hover { background: #2ea043; }
+        button.main-btn:hover:not(:disabled) { background: #2ea043; }
         .hidden { display: none; }
-        .input-group { margin-top: 15px; }
-        input { padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #333; background: #2d2d2d; color: white; text-align: center; font-size: 16px; margin-bottom: 10px;}
+        
+        /* Advanced Form Styling */
+        .input-group { margin-top: 15px; text-align: left; }
+        .input-group label { font-size: 12px; color: #8b949e; display: block; margin-bottom: 5px; margin-top: 10px; font-weight: 600;}
+        input { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #333; background: #2d2d2d; color: white; box-sizing: border-box; font-size: 15px;}
+        
+        /* Analytics Header Display */
+        .analytics-container { display: flex; background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin: 20px 0; padding: 10px 0;}
+        .analytic-block { flex: 1; text-align: center; }
+        .analytic-block:first-child { border-right: 1px solid #30363d; }
+        .analytic-label { font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+        .analytic-value { font-size: 16px; font-weight: bold; color: #fff; margin-top: 3px;}
+
+        /* Month Navigation Headers */
+        .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+        .nav-arrow { background: transparent; border: none; color: #8b949e; font-size: 20px; cursor: pointer; padding: 0 10px; font-weight: bold;}
+        .nav-arrow:hover { color: #fff; }
+        h3 { margin: 0; font-size: 16px; }
         
         /* Contribution Grid Area */
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px; min-height: 150px;}
-        .square { width: 100%; aspect-ratio: 1; background: #2d2d2d; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; min-height: 150px;}
+        .square { width: 100%; aspect-ratio: 1; background: #2d2d2d; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; box-sizing: border-box;}
         .square.active { background: #238636; color: white; font-weight: bold; }
+        .square.today { border: 2px solid #58a6ff; color: #58a6ff; font-weight: bold; }
+        .square.active.today { background: #238636; border: 2px solid #58a6ff; color: white; }
         
-        .secondary-btn { background: #30363d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;}
+        .secondary-btn { background: #30363d; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px;}
         .secondary-btn:hover { background: #444c56; }
-        hr { border: 0; border-top: 1px solid #30363d; margin: 25px 0; }
-        h3 { margin-bottom: 5px; }
-        .version-tag { font-size: 11px; color: #444c56; margin-top: 15px; text-align: center; font-weight: 500; }
-        .loading-text { color: #8b949e; font-style: italic; font-size: 14px; }
+        hr { border: 0; border-top: 1px solid #30363d; margin: 20px 0; }
+        .version-tag { font-size: 10px; color: #30363d; margin-top: 15px; text-align: center; font-weight: 600; }
+        
+        /* Toast Notification System */
+        .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #238636; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: bottom 0.3s ease; z-index: 999; white-space: nowrap;}
+        .toast.show { bottom: 30px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <!-- Profile Selection Switch Components -->
+    <!-- Profile Selection Switch -->
     <div class="user-selector">
-        <button class="user-btn" data-user="Husband" onclick="App.switchUser('Husband')">Husband</button>
-        <button class="user-btn" data-user="Wife" onclick="App.switchUser('Wife')">Wife</button>
+        <button class="user-btn" data-user="Suami" onclick="App.switchUser('Suami')">Suami</button>
+        <button class="user-btn" data-user="Istri" onclick="App.switchUser('Istri')">Istri</button>
     </div>
 
     <!-- Main Action State Container -->
     <div id="action-zone">
-        <button class="main-btn" id="checkin-btn">Check In Today</button>
+        <button class="main-btn" id="checkin-btn">Check In Sekarang</button>
     </div>
 
-    <!-- Question State Container -->
+    <!-- Advanced Question State Container -->
     <div id="question-zone" class="hidden">
-        <p style="margin-top:0;">Want to log workout duration?</p>
         <div class="input-group">
-            <input type="number" id="duration-input" inputmode="numeric" placeholder="Minutes (e.g., 45)">
-            <button class="main-btn" id="submit-time-btn">Save with Time</button>
-            <button id="skip-time-btn" class="secondary-btn" style="margin-top: 8px;">No, just Check In</button>
+            <label>Tanggal Workout</label>
+            <input type="date" id="input-date">
+            
+            <label>Jam Workout (Opsional)</label>
+            <input type="time" id="input-time">
+            
+            <label>Durasi Latihan (Opsional - Menit)</label>
+            <input type="number" id="input-duration" inputmode="numeric" placeholder="Contoh: 45">
+        </div>
+        <button class="main-btn" id="submit-btn" style="margin-top: 15px;">Simpan Laporan</button>
+        <button id="cancel-btn" class="secondary-btn" style="margin-top: 8px;">Kembali</button>
+    </div>
+
+    <!-- Analytics Dashboard Header -->
+    <div class="analytics-container">
+        <div class="analytic-block">
+            <div class="analytic-label">Streak Aktif</div>
+            <div class="analytic-value" id="streak-metric">🔥 0 Hari</div>
+        </div>
+        <div class="analytic-block">
+            <div class="analytic-label">Total Durasi Bulan Ini</div>
+            <div class="analytic-value" id="duration-metric">0 mnt</div>
         </div>
     </div>
 
     <hr>
 
-    <h3 id="calendar-title">Loading...</h3>
+    <!-- Month Navigation Component -->
+    <div class="calendar-header">
+        <button class="nav-arrow" id="prev-month">‹</button>
+        <h3 id="calendar-title">Memuat...</h3>
+        <button class="nav-arrow" id="next-month">›</button>
+    </div>
+    
     <div class="grid" id="calendar-grid"></div>
     
     <div class="version-tag" id="app-version">v0.0.0</div>
 </div>
 
-<!-- Architecture Script Engine Orchestration Pipeline -->
+<!-- Toast Component Instance -->
+<div id="toast" class="toast">Notifikasi</div>
+
+<!-- Load Scripts Engine Pipeline -->
 <script src="config.js"></script>
 <script src="api.js"></script>
 <script src="app.js"></script>
-
-<script>
-    // Register PWA Service Worker Pipeline Engine
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker initialized cleanly.', reg.scope))
-                .catch(err => console.error('Service Worker registration dropped:', err));
-        });
-    }
-</script>
 
 </body>
 </html>
