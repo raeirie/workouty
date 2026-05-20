@@ -1,10 +1,9 @@
 /**
  * WORKOUT TRACKER CORE APPLICATION - VERSION 2.1.1
- * FITUR: DEPRECIATED FAVORITE TIME METRIC (CLEANUP) & FIXED INCOGNITO AUTH AUTO-LOGIN
+ * FITUR: FIX MOBILE SCROLL OVERFLOW & SYNC BOTTOM NAV TAB STATE CASE-SENSITIVITY
  */
 
 const State = {
-    // Memastikan jika localStorage kosong (seperti di incognito), user WAJIB null
     currentUser: localStorage.getItem('activeUser') || null,
     currentTab: 'home',
     historyData: [],
@@ -22,7 +21,7 @@ const DOM = {
     viewHome: document.getElementById('view-home'),
     viewProgress: document.getElementById('view-progress'),
     navHome: document.getElementById('nav-home'),
-    navprogress: document.getElementById('nav-progress'),
+    navProgress: document.getElementById('nav-progress'), // Perbaikan Kapitalisasi Sinkronisasi (navProgress)
     
     fabBtn: document.getElementById('fab-checkin-btn'),
     sheetBackdrop: document.getElementById('sheet-backdrop'),
@@ -35,7 +34,6 @@ const DOM = {
     mCount: document.getElementById('m-count'),
     mDuration: document.getElementById('m-duration'),
     mAvg: document.getElementById('m-avg'),
-    // DOM.mPeakTime telah dihapus permanen agar bersih dari sampah kode
     
     calendarTitle: document.getElementById('calendar-title'),
     calendarGrid: document.getElementById('calendar-grid'),
@@ -48,12 +46,11 @@ const App = {
         this.setupDateDisplay();
         this.setupEventListeners();
         
-        // Proteksi Ketat Layar Login
         if (State.currentUser === null || State.currentUser === undefined || State.currentUser === "null") {
-            localStorage.removeItem('activeUser'); // Lap bersih jika ada string "null" tersimpan
+            localStorage.removeItem('activeUser');
             State.currentUser = null;
             DOM.loginOverlay.classList.remove('hidden');
-            DOM.loginOverlay.style.display = "flex"; // Memaksa overlay login muncul visualnya
+            DOM.loginOverlay.style.display = "flex";
         } else {
             DOM.loginOverlay.classList.add('hidden');
             DOM.loginOverlay.style.display = "none";
@@ -73,7 +70,7 @@ const App = {
         DOM.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
         
         if (DOM.navHome) DOM.navHome.addEventListener('click', () => this.switchTab('home'));
-        if (DOM.navprogress) DOM.navprogress.addEventListener('click', () => this.switchTab('progress'));
+        if (DOM.navProgress) DOM.navProgress.addEventListener('click', () => this.switchTab('progress'));
     },
 
     showToast(message, isError = false) {
@@ -114,12 +111,12 @@ const App = {
             DOM.viewHome.classList.add('active-view');
             DOM.viewProgress.classList.remove('active-view');
             DOM.navHome.classList.add('active-nav');
-            DOM.navprogress.classList.remove('active-nav');
+            if (DOM.navProgress) DOM.navProgress.classList.remove('active-nav');
         } else {
             DOM.viewHome.classList.remove('active-view');
             DOM.viewProgress.classList.add('active-view');
-            DOM.navHome.classList.add('active-nav');
-            DOM.navprogress.classList.remove('active-nav');
+            DOM.navHome.classList.remove('active-nav');
+            if (DOM.navProgress) DOM.navProgress.classList.add('active-nav');
         }
     },
 
@@ -178,9 +175,6 @@ const App = {
         const avgMins = sessionCount > 0 ? Math.round(totalMins / sessionCount) : 0;
         DOM.mAvg.innerText = `${avgMins} mnt`;
 
-        // ========================================================
-        // KALKULASI STREAK & STATUS CHECK-IN HARIAN
-        // ========================================================
         const allCheckedDates = [...new Set(cleanHistory
             .filter(entry => entry.userName === State.currentUser)
             .map(entry => {
